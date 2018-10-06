@@ -15,50 +15,38 @@ class Calc3Core
 
     //Calculate RPN expression
     public function calculateRpn($rpn){
-        if($this->deep > 100000){
-            throw new Exception('Recursion goes too deep');
-        }
-        $this->deep++;
+        $stack = [];
+        foreach($rpn as $element){
+            if(preg_match("/[\+\-\/\*]/", $element)){
+                $el_1 = array_pop($stack);
+                $el_2 = array_pop($stack);
 
-        $result = [];
-        $len = count($rpn);
-
-        for($i = 0; $i < $len; $i++ ){
-            $currentElement = $rpn[$i];
-            $prevVal_1 = $i - 1 >= 0 ? $rpn[$i - 1] : '';
-            $prevVal_2 = $i - 2 >= 0 ? $rpn[$i - 2] : '';
-
-            if(is_string($currentElement) && preg_match("/[\+\-\/\*]/", $currentElement)
-                && (preg_match("/[0-9]/", $prevVal_1) || is_float($prevVal_1))
-                && (preg_match("/[0-9]/", $prevVal_2) || is_float($prevVal_2))){
                 $res = 0;
-                switch ($currentElement){
+                switch ($element){
                     case '+':
-                        $res = (float)$prevVal_2 + (float)$prevVal_1;
+                        $res = (float)$el_2 + (float)$el_1;
                         break;
                     case '-':
-                        $res = (float)$prevVal_2 - (float)$prevVal_1;
+                        $res = (float)$el_2 - (float)$el_1;
                         break;
                     case '*':
-                        $res = (float)$prevVal_2 * (float)$prevVal_1;
+                        $res = (float)$el_2 * (float)$el_1;
                         break;
                     case '/':
-                        $res = (float)$prevVal_2 / (float)$prevVal_1;
+                        $res = (float)$el_2 / (float)$el_1;
                         break;
                 }
-                array_pop($result);
-                array_pop($result);
-                $result[] = $res;
+                $stack[] = $res;
             }
             else{
-                $result[] = $currentElement;
+                $stack[] = (float)$element;
             }
         }
-        if(count($result) == 1){
-            return $result[0];
+        if(count($stack) === 1){
+            return $stack[0];
         }
         else{
-            return $this->calculateRpn($result);
+            throw new Exception('Error!');
         }
     }
 
